@@ -57,6 +57,7 @@ class Table():
         self.exchanged = False
         self.heart_occur = False
         self.board = [None for _ in range(n_players)]
+        self.income = [None for _ in range(n_players)]
         self.first_draw = None
 
     def game_start(self):
