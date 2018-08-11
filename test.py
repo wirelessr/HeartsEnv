@@ -1,4 +1,4 @@
-from normal_ver import Table
+from hearts_core import Table
 t = Table()
 t.render()
 

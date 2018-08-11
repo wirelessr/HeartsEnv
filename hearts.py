@@ -3,41 +3,11 @@ import random
 import gym
 from gym import spaces
 
-# 0:s, 1:h, 2:d, 3:c (-1: None)
-# 0:2, 1:3, ..., 8:T, 9:J, 10:Q, 11:K, 12:A (-1: None)
-deck = [(rank, suit) for rank in range(13) for suit in range(4)]
-n_seats = 4
-n_pocket_cards = 13
-
-def _pad(self, l, n, v):
-    if (not l) or (l is None):
-        l = []
-    return l + [v] * (n - len(l))
-
-class Player(object):
-    def __init__(self, idx, cards):
-        self._idx = idx
-        self.hand = cards
-        self.income = []
-
-class Table(object):
-    def __init__(self, players):
-        self._player = players
-        self.n_round = 0
-        self.board = [(-1, -1)] * n_seats
-        for idx, player in enumerate(self._player):
-            if (0, 3) in player.hand:
-                self.start_pos = idx
-                break
-
+from hearts_core import *
 
 class HeartsEnv(gym.Env):
     def __init__(self):
-        self._deck = []
-        self._player = []
-        self._round = 0
-        self._table = None
-
+        # TODO
         self.observation_space = spaces.Tuple([
             # player states
             spaces.Tuple([
@@ -63,7 +33,13 @@ class HeartsEnv(gym.Env):
             ]),
         ])
         # TODO
-        self.action_space = spaces.Discrete(2)
+        self.action_space = spaces.Tuple([
+            spaces.Discrete(4),
+            spaces.Tuple([
+                spaces.Discrete(13),
+                spaces.Discrete(4),
+            ]),
+        ])
 
 
     # TODO
