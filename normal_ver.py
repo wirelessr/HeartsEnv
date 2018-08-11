@@ -51,8 +51,8 @@ class Table():
 
     def reset(self):
         self.n_round = 0
-        self.start_pos = -1
-        self.cur_pos = -1
+        self.start_pos = 0
+        self.cur_pos = 0
         self.bank = [None for _ in range(n_players)]
         self.exchanged = False
         self.heart_occur = False
@@ -69,8 +69,6 @@ class Table():
         for i, player in enumerate(self.players):
             player.hand = deck[i*n_hands : (i+1)*n_hands]
 
-        self._find_clubs_3()
-    
     def _need_exchange(self):
         if not self.exchanged and self.n_games % 4 != 0:
             return True
@@ -98,7 +96,7 @@ class Table():
                 return i
         return None
 
-    def _find_clubs_3(self):
+    def _find_clubs_2(self):
         for i, player in enumerate(self.players):
             if (0, C) in player.hand:
                 self.start_pos = i
@@ -131,6 +129,15 @@ class Table():
                         color=True))
             print(' ', cards, '\n')
 
+        board = ''
+        for card in self.board:
+            if card:
+                rank, suit = card
+                board += (' '+unicard('%s%s' % (RANK_TO_CARD[rank], SUIT_TO_CARD[suit]),\
+                        color=True)+' ')
+            else:
+                board += ' NA'
+        print(board, '\n')
 
     def step(self, actions):
         cur_pos, draws = actions
@@ -164,7 +171,7 @@ class Table():
                         player.hand += self.bank[(i + 2) % 4]
 
                 self.exchanged = True
-                self._find_clubs_3()
+                self._find_clubs_2()
             else:
                 self.cur_pos = (self.cur_pos + 1) % n_players
         else:
@@ -187,21 +194,25 @@ class Table():
                     raise Exception('Suit does not match')
 
             self.board[cur_pos] = draw
+            if suit == H or draw == (10, S):
+                self.heart_occur = True
+            self.players[cur_pos].hand.remove(draw)
+
             if None not in self.board:
-                first_suit, max_rank = self.first_draw
-                for board_rank, board_suit in self.board:
-                    if first_suit and board_rank > max_rank:
+                max_rank, first_suit = self.first_draw
+                for i, (board_rank, board_suit) in enumerate(self.board):
+                    if first_suit == board_suit and board_rank > max_rank:
                         max_rank = board_rank
 
-                self.start_pos = self.board.index((first_suit, max_rank))
+                self.start_pos = self.board.index((max_rank, first_suit))
                 self.players[self.start_pos].income += self.board
                 self.board = [None for _ in range(n_players)]
                 self.first_draw = None
+                self.n_round += 1
                 self.cur_pos = self.start_pos
             else:
                 self.cur_pos = (self.cur_pos + 1) % n_players
             
-            self.n_round += 1
 
 
         if self.n_round == 13:
@@ -226,5 +237,7 @@ class Table():
             self.game_start()
         
         return False
-        
-        
+
+    def _step(self, actions):
+        self.step(actions)
+        self.render()
