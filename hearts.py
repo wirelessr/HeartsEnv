@@ -68,8 +68,16 @@ class HeartsEnv(gym.Env):
             if rank >= 0 and suit >= 0:
                 draws.append((rank, suit))
 
+        score_before = self._table[cur_pos].player.get_rewards()
+
         done = self._table.step((cur_pos, draws))
-        return self._get_current_state, 0, done, []
+
+        score_after = self._table[cur_pos].player.get_rewards()
+        # XXX I think this is too simple
+        rewards = score_after - score_before
+        
+        # TODO Maybe can return some debug info
+        return self._get_current_state(), rewards, done, {}
 
     def _pad(self, l, n, v):
         if (not l) or (l is None):

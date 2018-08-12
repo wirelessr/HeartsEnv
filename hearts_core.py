@@ -43,6 +43,17 @@ class Player():
         self.income = []
         self.score = 0
 
+    def get_rewards(self):
+        rewards = 0
+        for rank, suit in self.income:
+            if (rank, suit) == (10, S):
+                rewards -= 13
+            elif suit == H:
+                rewards -= 1
+        
+        return rewards if rewards != -26 else 26
+
+
 class Table():
     def __init__(self):
         self.players = [Player() for _ in range(n_players)]
