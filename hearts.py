@@ -1,13 +1,13 @@
 import random
 
 import gym
-from gym import spaces
+from gym import spaces, error
+from gym.utils import seeding
 
 from hearts_core import *
 
 class HeartsEnv(gym.Env):
     def __init__(self):
-        # TODO
         self.observation_space = spaces.Tuple([
             # player states
             spaces.Tuple([
@@ -48,15 +48,33 @@ class HeartsEnv(gym.Env):
             ] * 3),
         ])
 
+    def seed(self, seed=None):
+        _, seed = seeding.np_random(seed)
+        return [seed]
+
+    def render(self, mode='human', close=False):
+        self._table.render()
+
+    def step(self, action):
+        if not self.action_space.contains(action):
+            raise error.Error('Invalid action')
+        
+        draws = []
+        cur_pos, card_array = action
+        for card in card_array:
+            rank = card[0]
+            suit = card[1]
+            if rank >= 0 and suit >= 0:
+                draws.append((rank, suit))
+
+        done = self._table.step((cur_pos, draws))
+        return self._get_current_state, 0, done, []
+
     def _pad(self, l, n, v):
         if (not l) or (l is None):
             l = []
         return l + [v] * (n - len(l))
 
-
-    # TODO
-    def step(obs):
-        return cur_obs, reward, isfinish, info
 
     # XXX ...strange I fell confused about the return type
     # What type is for MultiDiscrete XXX
@@ -67,20 +85,18 @@ class HeartsEnv(gym.Env):
                 int(player.score),
             ]
             
-            player_hand = player.hand
-            self._pad(player_hand, 13, (-1, -1))
+            player_hand = self._pad(player.hand, 13, (-1, -1))
 
-            player_income = player.income
-            self._pad(player_income, 52, (-1, -1))
+            player_income = self._pad(player.income, 52, (-1, -1))
 
             # Tuple: [int], ([r, s], [r, s], ...), ([r, s], [r, s], ...)
             player_states.append((player_features, player_hand, player_income))
 
         table_states = [
             int(self._table.n_round),
-            int(self._table.start_pos)
+            int(self._table.start_pos),
             int(self._table.cur_pos),
-            int(self._table.exchange),
+            int(self._table.exchanged),
             int(self._table.heart_occur),
             int(self._table.n_games),
         ]
@@ -96,11 +112,10 @@ class HeartsEnv(gym.Env):
 
         banks = []
         for cards in self._table.bank:
-            bank = cards
-            self._pad(bank, 3, (-1, -1))
+            bank = self._pad(cards, 3, (-1, -1))
             banks.append(tuple(bank))
 
-        table_states.append(boards, first_draw, banks)
+        table_states += [boards, first_draw, banks]
 
         return (tuple(player_states), tuple(table_states))
 
