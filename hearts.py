@@ -3,6 +3,7 @@ import random
 import gym
 from gym import spaces, error
 from gym.utils import seeding
+from numpy import array
 
 from hearts_core import *
 
@@ -76,8 +77,6 @@ class HeartsEnv(gym.Env):
         return l + [v] * (n - len(l))
 
 
-    # XXX ...strange I fell confused about the return type
-    # What type is for MultiDiscrete XXX
     def _get_current_state(self):
         player_states = []
         for idx, player in enumerate(self._table.players):
@@ -85,12 +84,19 @@ class HeartsEnv(gym.Env):
                 int(player.score),
             ]
             
-            player_hand = self._pad(player.hand, 13, (-1, -1))
+            player_hand = []
+            for card in player.hand:
+                player_hand.append(array(card))
+            player_hand = self._pad(player_hand, 13, array((-1, -1)))
 
-            player_income = self._pad(player.income, 52, (-1, -1))
+            player_income = []
+            for card in player.income:
+                player_income.append(array(card))
+            player_income = self._pad(player_income, 52, array((-1, -1)))
 
             # Tuple: [int], ([r, s], [r, s], ...), ([r, s], [r, s], ...)
-            player_states.append((player_features, player_hand, player_income))
+            player_features += [tuple(player_hand), tuple(player_income)]
+            player_states += player_features
 
         table_states = [
             int(self._table.n_round),
@@ -104,23 +110,29 @@ class HeartsEnv(gym.Env):
         boards = []
         for card in self._table.board:
             if card:
-                boards.append(card)
+                boards.append(array(card))
             else:
-                boards.append((-1, -1))
+                boards.append(array((-1, -1)))
 
-        first_draw = self._table.first_draw if self._table.first_draw else (-1, -1)
+        first_draw = [array(self._table.first_draw)] if self._table.first_draw\
+                else [array((-1, -1))]
 
         banks = []
         for cards in self._table.bank:
-            bank = self._pad(cards, 3, (-1, -1))
+            bank = []
+            if cards:
+                for card in cards:
+                    bank.append(array(card))
+            bank = self._pad(bank, 3, array((-1, -1)))
             banks.append(tuple(bank))
 
-        table_states += [boards, first_draw, banks]
+        table_states += [tuple(boards), tuple(first_draw), tuple(banks)]
 
         return (tuple(player_states), tuple(table_states))
 
     def reset(self):
         self._table = Table()
+        self._table.game_start()
         return self._get_current_state()
 
 
