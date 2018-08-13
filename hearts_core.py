@@ -79,6 +79,7 @@ class Table():
 
         for i, player in enumerate(self.players):
             player.hand = deck[i*n_hands : (i+1)*n_hands]
+            player.income = []
 
     def _need_exchange(self):
         if not self.exchanged and self.n_games % 4 != 0:
