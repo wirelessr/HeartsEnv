@@ -155,17 +155,17 @@ class Table():
         cur_pos, draws = actions
         
         if cur_pos != self.cur_pos:
-            raise Exception('Not your turn')
+            raise TurnError('Not your turn')
         
         for draw in draws:
             if draw not in self.players[cur_pos].hand:
-                raise Exception('Player does not have %r' % [draw])
+                raise DrawError('Player does not have %r' % [draw])
 
         if self._need_exchange():
             if self.bank[cur_pos]:
-                raise Exception('Already dropped')
+                raise FatalError('Already dropped')
             if len(draws) != 3:
-                raise Exception('Draws less than 3')
+                raise DrawLessThanThreeError('Draws less than 3')
 
             self.bank[cur_pos] = draws
             for draw in draws:
@@ -178,9 +178,11 @@ class Table():
                 elif self.n_games % 4 == 2: # pass to right
                     for i, player in enumerate(self.players):
                         player.hand += self.bank[(i + 1) % 4]
-                else:
+                elif self.n_games % 4 == 3:
                     for i, player in enumerate(self.players):
                         player.hand += self.bank[(i + 2) % 4]
+                else:
+                    raise FatalError('Game# mod 4 == 0')
 
                 self.exchanged = True
                 self._find_clubs_2()
@@ -188,22 +190,22 @@ class Table():
                 self.cur_pos = (self.cur_pos + 1) % n_players
         else:
             if len(draws) > 1:
-                raise Exception('Draw more than 1 card')
+                raise DrawMoreThanOneError('Draw more than 1 card')
 
             draw = draws[0]
             rank, suit = draw
             if self.start_pos == cur_pos:
                 if self.n_round == 0 and (0, C) != draw:
-                    raise Exception('The first draw must be (0, 3)')
+                    raise RuleError('The first draw must be (0, 3)')
                 if not self.heart_occur and \
                         (suit == H or (10, S) == draw):
-                    raise Exception('Cannot draw HEART')
+                    raise RuleError('Cannot draw HEART')
                 self.first_draw = draw
             else:
                 if not self.first_draw:
-                    raise Exception('You are not the first one')
+                    raise FatalError('You are not the first one')
                 if not self._match_suit(cur_pos, suit):
-                    raise Exception('Suit does not match')
+                    raise RuleError('Suit does not match')
 
             self.board[cur_pos] = draw
             if suit == H or draw == (10, S):
@@ -253,3 +255,21 @@ class Table():
     def _step(self, actions):
         self.step(actions)
         self.render()
+
+class TurnError(Exception):
+    pass
+
+class DrawMoreThanOneError(Exception):
+    pass
+
+class DrawLessThanThreeError(Exception):
+    pass
+
+class DrawError(Exception):
+    pass
+
+class FatalError(Exception):
+    pass
+
+class RuleError(Exception):
+    pass
