@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/wirelessr/HeartsEnv.svg?branch=master)](https://travis-ci.org/wirelessr/HeartsEnv)
+[![codecov](https://codecov.io/gh/wirelessr/HeartsEnv/branch/master/graph/badge.svg)](https://codecov.io/gh/wirelessr/HeartsEnv)
   
 ### Reference
   

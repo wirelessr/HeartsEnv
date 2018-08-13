@@ -2,9 +2,13 @@ language: python
 
 install:
   - pip install -r requirements.txt
+  - pip install codecov pytest-cov
 
 script:
-  - pytest
+  - pytest --cov=./
 
 virtualenv:
   system_site_packages: true
+
+after_success:
+  - codecov
