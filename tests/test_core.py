@@ -1,6 +1,9 @@
+import logging
 import unittest
 
 from ..hearts_core import *
+
+logger = logging.getLogger(__name__)
 
 class HeartsCoreTest(unittest.TestCase):
     def setUp(self):
@@ -48,7 +51,7 @@ class HeartsCoreTest(unittest.TestCase):
         self.table.game_start()
         self.table.render()
 
-    def test_table__step__failed(self):
+    def test_table__step__draw(self):
         self._deal()
 
         with self.assertRaises(TurnError):
@@ -63,6 +66,28 @@ class HeartsCoreTest(unittest.TestCase):
         self.table.n_games = 1
         with self.assertRaises(DrawLessThanThreeError):
             self.table.step((0, self.table.players[0].hand[0:2]))
+
+        self.table.n_games = 3
+        new_deck = [(rank, suit) for suit in range(4) for rank in range(13)]
+        self.table.game_start(new_deck)
+        with self.assertRaises(FirstDrawError):
+            self.table.step((3, self.table.players[3].hand[1:2]))
+
+        self.table.step((3, self.table.players[3].hand[0:1]))
+
+        self.table.players[0].hand[0:3] = [(12,3), (12,2), (12,1)]
+        with self.assertRaises(RuleError):
+            self.table.step((0, [(12, 1)]))
+        self.table.step((0, [(12, 3)]))
+
+        self.table.players[1].hand[0:3] = [(11,3), (11,2), (11,1)]
+        self.table.step((1, [(11, 3)]))
+        self.table.step((2, [(12, 2)]))
+
+        self.assertEqual(len(self.table.players[0].income), 4)
+
+        with self.assertRaises(HeartsError):
+            self.table.step((0, [(10, 0)]))
 
 
     def test_table__step__exchange(self):
@@ -108,10 +133,60 @@ class HeartsCoreTest(unittest.TestCase):
         with self.assertRaises(DrawMoreThanOneError):
             self.table.step((0, self.table.players[0].hand[0:3]))
 
+    def test_table__step__shoot_moon(self):
+        self._deal()
 
+        def _draw_one(i, player):
+            self.table.step((i, player.hand[0:1]))
 
+        self.table.players[0].hand, self.table.players[3].hand = \
+            self.table.players[3].hand, self.table.players[0].hand
+        for _ in range(13):
+            self._helper(_draw_one)
+            
+        self.assertEqual(self.table.players[0].score, 0)
+        self.assertEqual(self.table.players[1].score, 26)
+        self.assertEqual(self.table.players[2].score, 26)
+        self.assertEqual(self.table.players[3].score, 26)
 
+    def test_table__step__shoot_moon(self):
+        self._deal()
+
+        def _draw_one(i, player):
+            self.table.step((i, player.hand[0:1]))
+
+        self.table.players[0].hand, self.table.players[3].hand = \
+            self.table.players[3].hand, self.table.players[0].hand
+        for _ in range(13):
+            self._helper(_draw_one)
+            
+        self.assertEqual(self.table.players[0].score, 0)
+        self.assertEqual(self.table.players[1].score, 26)
+        self.assertEqual(self.table.players[2].score, 26)
+        self.assertEqual(self.table.players[3].score, 26)
+
+    def test_table__step__game_over(self):
+        self._deal()
+
+        self.table.players[0].hand[0], self.table.players[0].hand[1] = (1, 3), (0, 0)
+        self.table.players[3].hand[1] = (1, 0)
+
+        self.table.players[0].hand, self.table.players[3].hand = \
+            self.table.players[3].hand, self.table.players[0].hand
         
+        for i in range(4):
+            self.table.step((i, self.table.players[i].hand[0:1]))
 
+        for i in range(4):
+            j = (i + 3) % 4
+            self.table.step((j, self.table.players[j].hand[0:1]))
 
+        for _ in range(11):
+            for i in range(4):
+                self.table.step((i, self.table.players[i].hand[0:1]))
+            
+        self.assertEqual(self.table.players[0].score, 25)
+        self.assertEqual(self.table.players[1].score, 0)
+        self.assertEqual(self.table.players[2].score, 0)
+        self.assertEqual(self.table.players[3].score, 1)
 

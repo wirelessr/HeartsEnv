@@ -1,5 +1,6 @@
 import os
 import random
+import logging
 
 from unicards import unicard
 
@@ -37,6 +38,8 @@ deck = [(rank, suit) for rank in range(13) for suit in range(4)]
 n_players = 4
 n_hands = 13
 
+logger = logging.getLogger(__name__)
+
 class Player():
     def __init__(self):
         self.hand = []
@@ -70,16 +73,23 @@ class Table():
         self.board = [None for _ in range(n_players)]
         self.first_draw = None
 
-    def game_start(self):
+    def game_start(self, new_deck=None):
         # Reset Game State
         self.reset()
         self.n_games += 1
 
-        random.shuffle(deck)
+        if not new_deck:
+            global deck
+            random.shuffle(deck)
+        else:
+            deck = new_deck
 
         for i, player in enumerate(self.players):
             player.hand = deck[i*n_hands : (i+1)*n_hands]
             player.income = []
+
+        if self.n_games % 4 == 0:
+            self._find_clubs_2()
 
     def _need_exchange(self):
         if not self.exchanged and self.n_games % 4 != 0:
@@ -196,10 +206,10 @@ class Table():
             rank, suit = draw
             if self.start_pos == cur_pos:
                 if self.n_round == 0 and (0, C) != draw:
-                    raise RuleError('The first draw must be (0, 3)')
+                    raise FirstDrawError('The first draw must be (0, 3)')
                 if not self.heart_occur and \
                         (suit == H or (10, S) == draw):
-                    raise RuleError('Cannot draw HEART')
+                    raise HeartsError('Cannot draw HEART')
                 self.first_draw = draw
             else:
                 if not self.first_draw:
@@ -269,6 +279,12 @@ class DrawError(Exception):
     pass
 
 class FatalError(Exception):
+    pass
+
+class FirstDrawError(Exception):
+    pass
+
+class HeartsError(Exception):
     pass
 
 class RuleError(Exception):

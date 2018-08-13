@@ -5,7 +5,7 @@ from gym import spaces, error
 from gym.utils import seeding
 from numpy import array
 
-from hearts_core import *
+from .hearts_core import *
 
 class HeartsEnv(gym.Env):
     def __init__(self):
