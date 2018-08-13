@@ -43,3 +43,10 @@ class HeartsEnvTest(unittest.TestCase):
         action.append(tuple(draws))
 
         self.assertTrue(self.env.action_space.contains(tuple(action)))
+
+        obs, rew, done, info = self.env.step(action)
+        self.assertTrue(self.env.observation_space.contains(obs))
+        self.assertIs(type(rew), int)
+        self.assertIs(type(done), bool)
+        self.assertFalse(done)
+        self.assertIs(type(info), dict)

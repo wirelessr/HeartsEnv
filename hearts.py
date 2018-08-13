@@ -68,11 +68,11 @@ class HeartsEnv(gym.Env):
             if rank >= 0 and suit >= 0:
                 draws.append((rank, suit))
 
-        score_before = self._table[cur_pos].player.get_rewards()
+        score_before = self._table.players[cur_pos].get_rewards()
 
         done = self._table.step((cur_pos, draws))
 
-        score_after = self._table[cur_pos].player.get_rewards()
+        score_after = self._table.players[cur_pos].get_rewards()
         # XXX I think this is too simple
         rewards = score_after - score_before
         
