@@ -1,7 +1,7 @@
 import unittest
 
 from gym import Env, spaces
-from hearts import HeartsEnv
+from ..hearts import HeartsEnv
 
 class HeartsEnvTest(unittest.TestCase):
     def setUp(self):

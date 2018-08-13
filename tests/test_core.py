@@ -1,6 +1,6 @@
 import unittest
 
-from hearts_core import *
+from ..hearts_core import *
 
 class HeartsCoreTest(unittest.TestCase):
     def setUp(self):
