@@ -3,7 +3,7 @@ import unittest
 from gym import Env, spaces
 from numpy import array
 
-from ..hearts import HeartsEnv
+from hearts.hearts import HeartsEnv
 
 class HeartsEnvTest(unittest.TestCase):
     def setUp(self):

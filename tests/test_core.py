@@ -1,7 +1,7 @@
 import logging
 import unittest
 
-from ..hearts_core import *
+from hearts.hearts_core import *
 
 logger = logging.getLogger(__name__)
 
