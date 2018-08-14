@@ -235,6 +235,7 @@ class Table():
 
                 self.start_pos = self.board.index((max_rank, first_suit))
                 self.players[self.start_pos].income += self.board
+                self.bank = self.board
                 self.board = [None for _ in range(n_players)]
                 self.first_draw = None
                 self.n_round += 1
