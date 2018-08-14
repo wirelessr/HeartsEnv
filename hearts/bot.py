@@ -30,7 +30,6 @@ class RandomBot():
             if self.idx == start_pos and n_round == 0:
                 draws = [array([0, 3])]
             else:
-                print('first_draw', first_draw)
                 for card in hand_card:
                     if card[1] == first_draw[1]:
                         draws = [card]
@@ -39,17 +38,13 @@ class RandomBot():
                     for card in hand_card:
                         (rank, suit) = (card[0], card[1])
                         if not hearts_occur and (rank, suit) != (10, 0) and suit != 1:
-                            print('rule')
                             draws = [card]
                             break
                     else:
-                        print('random')
                         draws = [random.choice(hand_card)]
 
             draws += [array([-1, -1]), array([-1, -1])]
-            
 
-        # draws = [array([-1, -1]), array([-1, -1]), array([-1, -1])]
         action.append(tuple(draws))
         return tuple(action)
 
@@ -61,7 +56,7 @@ class BotProxy:
     def add_bot(self, pos, bot):
         self.bots[pos] = bot
 
-    def run_one_game(self):
+    def run_once(self):
         obs = self.env.reset()
         done = False
         
@@ -73,13 +68,14 @@ class BotProxy:
 
             player_obs = tuple([obs[0][i]] for i in range(cur_pos*3, cur_pos*3+3))
             action = self.bots[cur_pos].declare_action(player_obs, obs[1])
-            print(action)
             obs, rew, done, _ = self.env.step(action)
+
+        self.env.render()
+        return obs
 
 if __name__ == '__main__':
     proxy = BotProxy()
-    proxy.run_one_game()
-
+    proxy.run_once()
     
     
 
