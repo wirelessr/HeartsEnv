@@ -70,6 +70,7 @@ class SingleEnv(gym.Env):
             cur_pos = self._table.cur_pos
             obs = self._get_current_state()
             player_obs = tuple([obs[0][i]] for i in range(cur_pos*3, cur_pos*3+3))
+            logger.debug('[push turn] cur_pos %r', cur_pos)
             action = self.bots[cur_pos].declare_action(player_obs, obs[1])
             self._table.step(self._convert_actspace_act(action))
 

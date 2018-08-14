@@ -166,13 +166,14 @@ class Table():
 
     def step(self, actions):
         cur_pos, draws = actions
+        logger.debug('[core] cur_pos %r', cur_pos)
         
         if cur_pos != self.cur_pos:
             raise TurnError('Not your turn')
         
         for draw in draws:
             if draw not in self.players[cur_pos].hand:
-                raise DrawError('Player does not have %r' % [draw])
+                raise DrawError('Player %r does not have %r' % (cur_pos, draw))
 
         if self._need_exchange():
             if self.bank[cur_pos]:

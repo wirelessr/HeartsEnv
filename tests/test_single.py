@@ -1,5 +1,6 @@
 import logging
 import unittest
+import random
 
 from gym import Env, spaces
 from numpy import array
@@ -39,7 +40,8 @@ class SingleEnvTest(unittest.TestCase):
     def test_env__step(self):
         cur_pos = self.env._table.cur_pos
         self.assertEqual(cur_pos, self.env.PLAYER)
-        cards = self.env._table.players[cur_pos].hand[0:3]
+        me = self.env._table.players[cur_pos]
+        cards = me.hand[0:3]
 
         action = [cur_pos]
         draws = []
@@ -59,4 +61,22 @@ class SingleEnvTest(unittest.TestCase):
         self.assertFalse(done)
         self.assertIs(type(info), dict)
         self.assertEqual(cur_pos, self.env.PLAYER)
+
+        draws = []
+        me.hand.reverse()
+        if self.env._table.first_draw:
+            for card in me.hand:
+                if card[1] == self.env._table.first_draw[1]:
+                    draws.append(card)
+                    break
+        if not draws:
+            if self.env._table.n_round == 0:
+                draws = [(0, 3)]
+            else:
+                draws = [random.choice(me.hand)]
+
+        acts = self.env._convert_act_actspace((cur_pos, draws))
+        obs, rew, done, info = self.env.step(acts)
+        self.assertEqual(cur_pos, self.env.PLAYER)
+
 
