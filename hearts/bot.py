@@ -49,9 +49,9 @@ class RandomBot():
         return tuple(action)
 
 class BotProxy:
-    def __init__(self):
+    def __init__(self, render_delay=None):
         self.bots = [RandomBot(i) for i in range(4)]
-        self.env = HeartsEnv()
+        self.env = HeartsEnv(render_delay)
 
     def add_bot(self, pos, bot):
         self.bots[pos] = bot
@@ -72,11 +72,3 @@ class BotProxy:
 
         self.env.render()
         return obs
-
-if __name__ == '__main__':
-    proxy = BotProxy()
-    proxy.run_once()
-    
-    
-
-    
