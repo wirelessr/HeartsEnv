@@ -28,6 +28,7 @@ class HeartsEnvTest(unittest.TestCase):
         self.assertIs(type(seeds), list)
         for seed in seeds:
             self.assertIs(type(seed), int)
+            self.assertEqual(self.env.n_seed, seed)
 
     def test_env__render(self):
         self.env.render()

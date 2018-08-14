@@ -1,6 +1,7 @@
 import os
 import random
 import logging
+import time
 
 from unicards import unicard
 
@@ -58,10 +59,13 @@ class Player():
 
 
 class Table():
-    def __init__(self):
+    def __init__(self, seed=None, render_delay=None):
         self.players = [Player() for _ in range(n_players)]
         self.n_games = 0
         self.reset()
+        if seed:
+            random.seed(seed)
+        self.render_delay = render_delay
 
     def reset(self):
         self.n_round = 0
@@ -160,6 +164,8 @@ class Table():
             else:
                 board += ' NA'
         print(board, '\n')
+        if self.render_delay:
+            time.sleep(self.render_delay)
 
     def step(self, actions):
         cur_pos, draws = actions

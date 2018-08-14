@@ -9,6 +9,7 @@ from .hearts_core import *
 
 class HeartsEnv(gym.Env):
     def __init__(self):
+        self.n_seed = None
         self.observation_space = spaces.Tuple([
             # player states
             spaces.Tuple([
@@ -51,6 +52,7 @@ class HeartsEnv(gym.Env):
 
     def seed(self, seed=None):
         _, seed = seeding.np_random(seed)
+        self.n_seed = seed
         return [seed]
 
     def render(self, mode='human', close=False):
@@ -139,7 +141,7 @@ class HeartsEnv(gym.Env):
         return (tuple(player_states), tuple(table_states))
 
     def reset(self):
-        self._table = Table()
+        self._table = Table(self.n_seed)
         self._table.game_start()
         return self._get_current_state()
 
