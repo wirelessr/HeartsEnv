@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 class HeartsCoreTest(unittest.TestCase):
     def setUp(self):
-        self.table = Table(seed=10, render_delay=0.01)
+        self.table = Table(seed=10)
         self.player = Player()
 
     def tearDown(self):

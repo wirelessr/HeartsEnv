@@ -1,4 +1,5 @@
 import random
+import time
 
 import gym
 from gym import spaces, error
@@ -8,8 +9,9 @@ from numpy import array
 from .hearts_core import *
 
 class HeartsEnv(gym.Env):
-    def __init__(self):
+    def __init__(self, render_delay=None):
         self.n_seed = None
+        self.render_delay = render_delay
         self.observation_space = spaces.Tuple([
             # player states
             spaces.Tuple([
@@ -53,10 +55,13 @@ class HeartsEnv(gym.Env):
     def seed(self, seed=None):
         _, seed = seeding.np_random(seed)
         self.n_seed = seed
+        random.seed(seed)
         return [seed]
 
     def render(self, mode='human', close=False):
         self._table.render()
+        if self.render_delay:
+            time.sleep(self.render_delay)
 
     def step(self, action):
         if not self.action_space.contains(action):
