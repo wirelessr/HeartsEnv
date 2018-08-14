@@ -17,14 +17,17 @@ class SingleEnv(gym.Env):
         self.observation_space = spaces.Tuple([
             # player states
             spaces.Tuple([
-                spaces.Discrete(200), # score
+                spaces.Discrete(200), # p0 score
+                spaces.Discrete(200), # p1 score
+                spaces.Discrete(200), # p2 score
+                spaces.Discrete(200), # p3 score
                 spaces.Tuple([ # hand
                     spaces.MultiDiscrete([13, 4])
                 ] * 13),
                 spaces.Tuple([ # income
                     spaces.MultiDiscrete([13, 4])
                 ] * 52),
-            ] * 4),
+            ]),
             # table states
             spaces.Tuple([
                 spaces.Discrete(13), # n_round
@@ -68,8 +71,20 @@ class SingleEnv(gym.Env):
     def _push_turn(self):
         while self._table.cur_pos != self.PLAYER:
             cur_pos = self._table.cur_pos
+            player = self._table.players[cur_pos]
+
+            player_hand = []
+            for card in player.hand:
+                player_hand.append(array(card))
+            player_hand = self._pad(player_hand, 13, array((-1, -1)))
+
+            player_income = []
+            for card in player.income:
+                player_income.append(array(card))
+            player_income = self._pad(player_income, 52, array((-1, -1)))
+            
             obs = self._get_current_state()
-            player_obs = tuple([obs[0][i]] for i in range(cur_pos*3, cur_pos*3+3))
+            player_obs = tuple([player.score, tuple([player_hand,]), tuple([player_income,])])
             logger.debug('[push turn] cur_pos %r', cur_pos)
             action = self.bots[cur_pos].declare_action(player_obs, obs[1])
             self._table.step(self._convert_actspace_act(action))
@@ -106,7 +121,7 @@ class SingleEnv(gym.Env):
         self._push_turn()
 
         score_after = self._table.players[cur_pos].get_rewards()
-        # XXX I think this is too simple
+
         rewards = score_after - score_before
         
         # TODO Maybe can return some debug info
@@ -119,25 +134,25 @@ class SingleEnv(gym.Env):
 
 
     def _get_current_state(self):
-        player_states = []
-        for idx, player in enumerate(self._table.players):
-            player_features = [
-                int(player.score),
-            ]
-            
-            player_hand = []
-            for card in player.hand:
-                player_hand.append(array(card))
-            player_hand = self._pad(player_hand, 13, array((-1, -1)))
+        player_states = [self._table.players[i].score for i in range(self.PLAYER)] 
 
-            player_income = []
-            for card in player.income:
-                player_income.append(array(card))
-            player_income = self._pad(player_income, 52, array((-1, -1)))
+        player = self._table.players[self.PLAYER]
+        player_features = [
+            int(player.score),
+        ]
+        
+        player_hand = []
+        for card in player.hand:
+            player_hand.append(array(card))
+        player_hand = self._pad(player_hand, 13, array((-1, -1)))
 
-            # Tuple: [int], ([r, s], [r, s], ...), ([r, s], [r, s], ...)
-            player_features += [tuple(player_hand), tuple(player_income)]
-            player_states += player_features
+        player_income = []
+        for card in player.income:
+            player_income.append(array(card))
+        player_income = self._pad(player_income, 52, array((-1, -1)))
+
+        player_features += [tuple(player_hand), tuple(player_income)]
+        player_states += player_features
 
         table_states = [
             int(self._table.n_round),
