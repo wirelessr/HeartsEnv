@@ -209,7 +209,9 @@ class Table():
                     raise FirstDrawError('The first draw must be (0, 3)')
                 if not self.heart_occur and \
                         (suit == H or (10, S) == draw):
-                    raise HeartsError('Cannot draw HEART')
+                    for card in self.players[cur_pos].hand:
+                        if card[1] != H and card != (10, S):
+                            raise HeartsError('Cannot draw HEART')
                 self.first_draw = draw
             else:
                 if not self.first_draw:
