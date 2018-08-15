@@ -68,16 +68,13 @@ class SingleEnvTest(unittest.TestCase):
 
         draws = []
         me.hand.reverse()
-        if self.env._table.first_draw:
-            for card in me.hand:
-                if card[1] == self.env._table.first_draw[1]:
-                    draws.append(card)
-                    break
+        for card in me.hand:
+            if (card[0], card[1]) == (0, 3) or\
+            (self.env._table.first_draw and card[1] == self.env._table.first_draw[1]):
+                draws.append(card)
+                break
         if not draws:
-            if self.env._table.n_round == 0:
-                draws = [(0, 3)]
-            else:
-                draws = [random.choice(me.hand)]
+            draws = [random.choice(me.hand)]
 
         acts = self.env._convert_act_actspace((cur_pos, draws))
         obs, rew, done, info = self.env.step(acts)

@@ -62,6 +62,7 @@ class Table():
     def __init__(self, seed=None):
         self.players = [Player() for _ in range(n_players)]
         self.n_games = 0
+        self.backup = [None for _ in range(n_players)]
         self.reset()
         if seed:
             random.seed(seed)
@@ -186,13 +187,13 @@ class Table():
                 self.players[cur_pos].hand.remove(draw)
 
             if None not in self.bank:
-                if self.n_games % 4 == 1: # pass to left
+                if self.n_games % 4 == 1:   # pass to left
                     for i, player in enumerate(self.players):
                         player.hand += self.bank[i - 1]
                 elif self.n_games % 4 == 2: # pass to right
                     for i, player in enumerate(self.players):
                         player.hand += self.bank[(i + 1) % 4]
-                elif self.n_games % 4 == 3:
+                elif self.n_games % 4 == 3: # pass to cross
                     for i, player in enumerate(self.players):
                         player.hand += self.bank[(i + 2) % 4]
                 else:
@@ -235,7 +236,7 @@ class Table():
 
                 self.start_pos = self.board.index((max_rank, first_suit))
                 self.players[self.start_pos].income += self.board
-                self.bank = self.board
+                self.backup = self.board
                 self.board = [None for _ in range(n_players)]
                 self.first_draw = None
                 self.n_round += 1

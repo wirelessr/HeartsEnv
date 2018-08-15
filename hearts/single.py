@@ -69,6 +69,7 @@ class SingleEnv(gym.Env):
         self._table.render()
 
     def _push_turn(self):
+        done = False
         while self._table.cur_pos != self.PLAYER:
             cur_pos = self._table.cur_pos
             player = self._table.players[cur_pos]
@@ -87,7 +88,9 @@ class SingleEnv(gym.Env):
             player_obs = tuple([player.score, tuple([player_hand,]), tuple([player_income,])])
             logger.debug('[push turn] cur_pos %r', cur_pos)
             action = self.bots[cur_pos].declare_action(player_obs, obs[1])
-            self._table.step(self._convert_actspace_act(action))
+            done = self._table.step(self._convert_actspace_act(action))
+        
+        return done
 
     def _convert_actspace_act(self, action):
         draws = []
@@ -118,7 +121,8 @@ class SingleEnv(gym.Env):
         score_before = self._table.players[cur_pos].get_rewards()
         
         done = self._table.step(self._convert_actspace_act(action))
-        self._push_turn()
+        if not done:
+            done = self._push_turn()
 
         score_after = self._table.players[cur_pos].get_rewards()
 
@@ -174,7 +178,7 @@ class SingleEnv(gym.Env):
                 else [array((-1, -1))]
 
         banks = []
-        for cards in self._table.bank:
+        for cards in self._table.backup:
             bank = []
             if cards:
                 for card in cards:
