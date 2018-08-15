@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  hearts:
+    image: hearts
+    hostname: hearts
+    entrypoint:
+    - sh
+    - -c
+    - "sleep infinity"
+    volumes:
+      - ./:/hearts
+    privileged: true
+    restart: always
