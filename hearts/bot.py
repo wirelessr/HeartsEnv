@@ -41,7 +41,7 @@ class RandomBot(BotBase):
                 else:
                     for card in hand_card:
                         (rank, suit) = (card[0], card[1])
-                        if not hearts_occur and (rank, suit) != (10, 0) and suit != 1:
+                        if not hearts_occur and suit != 1:
                             draws = [card]
                             break
                     else:
@@ -79,7 +79,7 @@ class SequentialBot(BotBase):
                 else:
                     for card in hand_card:
                         (rank, suit) = (card[0], card[1])
-                        if not hearts_occur and (rank, suit) != (10, 0) and suit != 1:
+                        if not hearts_occur and suit != 1:
                             draws = [card]
                             break
                     else:
