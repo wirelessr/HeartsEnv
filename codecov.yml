@@ -1,3 +1,4 @@
 ignore:
   - "tests"
   - "demo"
+  - "bot_player.py"
