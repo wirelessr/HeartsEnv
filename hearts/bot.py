@@ -61,7 +61,7 @@ class SequentialBot(BotBase):
                 board, (first_draw,), bank = table_obs
         
         hand_card = sorted([c for c in hand if c[0] != -1 or c[1] != -1],\
-                key=lambda x: (x[1], x[0]))
+                key=lambda x: (x[1], x[0]), reverse=True)
         board_card = [c for c in board]
 
         if not exchanged and n_game % 4 != 0:

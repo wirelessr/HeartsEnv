@@ -1,7 +1,7 @@
 import unittest
 import logging
 
-from hearts.bot import BotProxy
+from hearts.bot import BotProxy, SequentialBot
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +13,7 @@ class HeartsBotTest(unittest.TestCase):
         pass
 
     def test_bot__run_once(self):
+        self.proxy.add_bot(0, SequentialBot(0))
         obs = self.proxy.run_once()
 
         max_score = 0
