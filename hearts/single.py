@@ -7,7 +7,7 @@ from gym.utils import seeding
 from numpy import array
 
 from .hearts_core import *
-from .bot import RandomBot
+from .bot import RandomBot, SequentialBot
 
 class SingleEnv(gym.Env):
     PLAYER = 3
@@ -57,7 +57,7 @@ class SingleEnv(gym.Env):
             ] * 3),
         ])
 
-        self.bots = [RandomBot(i) for i in range(3)]
+        self.bots = [random.choice([SequentialBot(i), RandomBot(i)]) for i in range(3)]
 
     def seed(self, seed=None):
         _, seed = seeding.np_random(seed)

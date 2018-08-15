@@ -6,6 +6,7 @@ from gym import Env, spaces
 from numpy import array
 
 from hearts.single import SingleEnv
+from hearts.bot import RandomBot, SequentialBot
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +14,9 @@ class SingleEnvTest(unittest.TestCase):
     def setUp(self):
         self.env = SingleEnv()
         self.r = self.env.reset()
+        self.env.bots[0] = RandomBot(0)
+        self.env.bots[1] = RandomBot(1)
+        self.env.bots[2] = SequentialBot(2)
 
     def tearDown(self):
         self.env.close()
