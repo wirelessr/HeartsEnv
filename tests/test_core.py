@@ -86,8 +86,9 @@ class HeartsCoreTest(unittest.TestCase):
 
         self.assertEqual(len(self.table.players[0].income), 4)
 
+        self.table.players[0].hand[0:3] = [(11,3), (11,2), (11,1)]
         with self.assertRaises(HeartsError):
-            self.table.step((0, [(10, 0)]))
+            self.table.step((0, [(11, 1)]))
 
 
     def test_table__step__exchange(self):
