@@ -69,7 +69,6 @@ class SingleEnv(gym.Env):
         self._table.render()
 
     def _push_turn(self):
-        done = False
         while self._table.cur_pos != self.PLAYER:
             cur_pos = self._table.cur_pos
             player = self._table.players[cur_pos]
@@ -89,8 +88,10 @@ class SingleEnv(gym.Env):
             logger.debug('[push turn] cur_pos %r', cur_pos)
             action = self.bots[cur_pos].declare_action(player_obs, obs[1])
             done = self._table.step(self._convert_actspace_act(action))
+            if done:
+                return True
         
-        return done
+        return False
 
     def _convert_actspace_act(self, action):
         draws = []
