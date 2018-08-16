@@ -42,10 +42,8 @@ class SingleEnv(gym.Env):
                 spaces.Tuple([ # first_draw
                     spaces.MultiDiscrete([13, 4])
                 ]),
-                spaces.Tuple([ # bank
-                    spaces.Tuple([
-                        spaces.MultiDiscrete([13, 4])
-                    ] * 3),
+                spaces.Tuple([ # backup
+                    spaces.MultiDiscrete([13, 4])
                 ] * 4)
             ]),
         ])
@@ -179,13 +177,11 @@ class SingleEnv(gym.Env):
                 else [array((-1, -1))]
 
         banks = []
-        for cards in self._table.backup:
-            bank = []
-            if cards:
-                for card in cards:
-                    bank.append(array(card))
-            bank = self._pad(bank, 3, array((-1, -1)))
-            banks.append(tuple(bank))
+        for card in self._table.backup:
+            if card:
+                banks.append(array(card))
+            else:
+                banks.append(array((-1, -1)))
 
         table_states += [tuple(boards), tuple(first_draw), tuple(banks)]
 
