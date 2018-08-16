@@ -21,7 +21,7 @@
     docker-compose up -d
 1. Run poker bot
     ```
-    docker-compose exec hearts python /hearts/bot_player.py
+    docker-compose exec hearts python /hearts/play-v1.py
 
 ## Other commands
 1. In docker-compose working directory

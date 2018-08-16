@@ -41,7 +41,7 @@ class MyBot(BotBase):
         return tuple(action)
 
 if __name__ == '__main__':
-    proxy = BotProxy(0)
+    proxy = BotProxy(2)
     proxy.add_bot(3, MyBot(3))
     proxy.run_once()
 
