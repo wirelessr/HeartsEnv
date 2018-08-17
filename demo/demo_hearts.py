@@ -1,3 +1,6 @@
+import sys
+sys.path.append('/hearts')
+
 import random
 from numpy import array
 from hearts.bot import BotProxy, BotBase
