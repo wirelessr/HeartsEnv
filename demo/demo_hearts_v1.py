@@ -251,7 +251,7 @@ class MyBot(BotBase):
             self.remove_unused_cards(hand_card)
             self.remove_unused_cards(board_card)
             self.remove_unused_cards(bank_card)
-            pp.pprint(self.info)
+            #pp.pprint(self.info)
 
             # 1 card
             if self.idx == start_pos and n_round == 0:
@@ -271,7 +271,7 @@ class MyBot(BotBase):
                 self.info["ex_first_draw"] = draws[0]
             else:
                 self.info["ex_first_draw"] = first_draw
-        pp.pprint(draws)
+        #pp.pprint(draws)
         action.append(tuple(draws))
         return tuple(action)
 
