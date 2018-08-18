@@ -15,6 +15,7 @@ class MyBot(BotBase):
 
     def init_info(self):
         self.info = {
+            "idx": self.idx,
             "ex_first_draw": None,
             "unused_cards": [
                 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -40,25 +41,25 @@ class MyBot(BotBase):
     def process_hand(self):
         hand = self.info["hand"]
         hearts_occur = self.info["hearts_occur"]
-        first_draw = self.info["first_draw"]
+        start_pos = self.info["start_pos"]
+        exchanged = self.info["exchanged"]
+        n_round = self.info["n_round"]
         # hand
         hand_card = [[], [], [], []]
         for c in hand:
             if not array_equal(c, array([-1, -1])):
                 hand_card[c[1]].append(c[0])
-        if not hearts_occur and first_draw[1] != H:
-            hand_card[H] = []
-        if not hearts_occur and first_draw[1] != S:
-            if 10 in hand_card[S]:
-                hand_card[S].remove(10)
-        if hand_card == [[], [], [], []]:
-            for c in hand:
-                if not array_equal(c, array([-1, -1])):
-                    hand_card[c[1]].append(c[0])
+        if exchanged or n_round > 0:
+            if not hearts_occur and self.idx == start_pos:
+                hand_card[H] = []
+            if hand_card == [[], [], [], []]:
+                for c in hand:
+                    if not array_equal(c, array([-1, -1])):
+                        hand_card[c[1]].append(c[0])
         # pp.pprint(hand_card)
         for s in range(4):
             hand_card[s] = sorted(hand_card[s])
-        #pp.pprint(hand_card)
+        # pp.pprint(hand_card)
 
         return hand_card
 
@@ -119,16 +120,22 @@ class MyBot(BotBase):
         # exchange A - Q of S
         s = S
         for r in [12,11,10]:
+            if len(draws) == 3:
+                break
             if r in hand_card[s]:
                 draws.append(array([r, s]))
-                hand_card[S].remove(r)
+                hand_card[s].remove(r)
+        #pp.pprint(draws)
 
         # exchange A - Q of H
         s = H
         for r in [12,11,10]:
+            if len(draws) == 3:
+                break
             if r in hand_card[s]:
                 draws.append(array([r, s]))
-                hand_card[S].remove(r)
+                hand_card[s].remove(r)
+        #pp.pprint(draws)
 
         # exchange A - Q of less suit
         s = less_suit
@@ -139,6 +146,7 @@ class MyBot(BotBase):
                 if r in hand_card[s]:
                     draws.append(array([r, s]))
                     hand_card[s].remove(r)
+        #pp.pprint(draws)
 
         # exchange A - 2 of all suit
         for r in [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]:
@@ -152,7 +160,6 @@ class MyBot(BotBase):
                     #pp.pprint(s)
                     draws.append(array([r, s]))
                     hand_card[s].remove(r)
-
         #pp.pprint(draws)
 
         return draws
@@ -219,6 +226,9 @@ class MyBot(BotBase):
         self.info["bank"] = bank
         self.info["hearts_occur"] = hearts_occur
         self.info["first_draw"] = first_draw
+        self.info["start_pos"] = start_pos
+        self.info["exchanged"] = exchanged
+        self.info["n_round"] = n_round
 
         #pp.pprint(hand)
         #pp.pprint(board)
