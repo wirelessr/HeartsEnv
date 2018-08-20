@@ -25,11 +25,10 @@ class SingleEnvTest(unittest.TestCase):
         self.assertTrue(self.env.observation_space.contains(self.r))
 
     def test_env__action_space(self):
-        action = [0]
         draws = [array([-1, -1]), array([-1, -1]), array([-1, -1])]
-        action.append(tuple(draws))
+        action = tuple(draws)
 
-        self.assertTrue(self.env.action_space.contains(tuple(action)))
+        self.assertTrue(self.env.action_space.contains(action))
 
     def test_env__seed(self):
         seeds = self.env.seed()
@@ -47,13 +46,12 @@ class SingleEnvTest(unittest.TestCase):
         me = self.env._table.players[cur_pos]
         cards = me.hand[0:3]
 
-        action = [cur_pos]
         draws = []
         for rank, suit in cards:
             draws.append(array([rank, suit]))
-        action.append(tuple(draws))
+        action = tuple(draws)
 
-        self.assertTrue(self.env.action_space.contains(tuple(action)))
+        self.assertTrue(self.env.action_space.contains(action))
 
         obs, rew, done, info = self.env.step(action)
 
@@ -76,8 +74,10 @@ class SingleEnvTest(unittest.TestCase):
         if not draws:
             draws = [random.choice(me.hand)]
 
-        acts = self.env._convert_act_actspace((cur_pos, draws))
-        obs, rew, done, info = self.env.step(acts)
+        # tuple to array
+        acts = [array([c[0], c[1]]) for c in draws]
+        acts = self.env._pad(acts, 3, array([-1, -1]))
+        obs, rew, done, info = self.env.step(tuple(acts))
         self.assertEqual(cur_pos, self.env.PLAYER)
 
     def test_env__run_once(self):
@@ -91,12 +91,10 @@ class SingleEnvTest(unittest.TestCase):
             if self.env._table.n_games % 4 != 0 and not self.env._table.exchanged:
                 cards = me.hand[0:3]
         
-                action = [cur_pos]
                 draws = []
                 for rank, suit in cards:
                     draws.append(array([rank, suit]))
-                action.append(tuple(draws))
-                acts = tuple(action)
+                acts = tuple(draws)
             else:
                 draws = []
                 for card in me.hand:
@@ -112,7 +110,11 @@ class SingleEnvTest(unittest.TestCase):
                                 break
                 if not draws:
                     draws = [random.choice(me.hand)]
-                acts = self.env._convert_act_actspace((cur_pos, draws))
+                
+                # tuple to array
+                draws = [array([c[0], c[1]]) for c in draws]
+                draws = self.env._pad(draws, 3, array([-1, -1]))
+                acts = tuple(draws)
         
             self.assertTrue(self.env.action_space.contains(acts))
             _, _, done, _ = self.env.step(acts)

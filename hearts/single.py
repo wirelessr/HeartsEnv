@@ -48,12 +48,9 @@ class SingleEnv(gym.Env):
             ]),
         ])
 
-        self.action_space = spaces.Tuple([
-            spaces.Discrete(4), # cur_pos
-            spaces.Tuple([ # bank(3) draw(1)
-                spaces.MultiDiscrete([13, 4])
-            ] * 3),
-        ])
+        self.action_space = spaces.Tuple([ # bank(3) draw(1)
+            spaces.MultiDiscrete([13, 4])
+        ] * 3)
 
         self.bots = [random.choice([SequentialBot(i), RandomBot(i)]) for i in range(3)]
 
@@ -84,46 +81,28 @@ class SingleEnv(gym.Env):
             obs = self._get_current_state()
             player_obs = tuple([player.score, tuple([player_hand,]), tuple([player_income,])])
             logger.debug('[push turn] cur_pos %r', cur_pos)
-            action = self.bots[cur_pos].declare_action(player_obs, obs[1])
-            done = self._table.step(self._convert_actspace_act(action))
+            cur_pos, draws = self.bots[cur_pos].declare_action(player_obs, obs[1])
+            draws = [(c[0], c[1]) for c in draws if not all(c == (-1, -1))]
+            done = self._table.step((cur_pos, draws))
             if done:
                 return True
         
         return False
-
-    def _convert_actspace_act(self, action):
-        draws = []
-        cur_pos, card_array = action
-        for card in card_array:
-            rank = card[0]
-            suit = card[1]
-            if rank >= 0 and suit >= 0:
-                draws.append((rank, suit))
-        return (cur_pos, draws)
-
-    def _convert_act_actspace(self, action):
-        cur_pos, draws = action
-        action_s = [cur_pos]
-        cards = []
-        for draw in draws:
-            cards.append(array([draw[0], draw[1]]))
-        cards = self._pad(cards, 3, array([-1, -1]))
-        action_s.append(tuple(cards))
-        return tuple(action_s)
 
 
     def step(self, action):
         if not self.action_space.contains(action):
             raise error.Error('Invalid action')
         
-        cur_pos, card_array = action
-        score_before = self._table.players[cur_pos].get_rewards()
+        card_array = action
+        score_before = self._table.players[self.PLAYER].get_rewards()
         
-        done = self._table.step(self._convert_actspace_act(action))
+        draws = [(c[0], c[1]) for c in card_array if not all(c == (-1, -1))]
+        done = self._table.step((self.PLAYER, draws))
         if not done:
             done = self._push_turn()
 
-        score_after = self._table.players[cur_pos].get_rewards()
+        score_after = self._table.players[self.PLAYER].get_rewards()
 
         rewards = score_after - score_before
         
