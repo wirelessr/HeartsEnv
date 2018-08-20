@@ -31,7 +31,8 @@ class HeartsEnvTest(unittest.TestCase):
             self.assertEqual(self.env.n_seed, seed)
 
     def test_env__render(self):
-        self.env.render()
+        self.env.render(mode='human')
+        self.env.render(mode='ansi')
 
     def test_env__step(self):
         cur_pos = self.env._table.cur_pos

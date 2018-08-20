@@ -91,7 +91,7 @@ class SequentialBot(BotBase):
         return tuple(action)
 
 class BotProxy:
-    def __init__(self, render_delay=None, mode='ansi'):
+    def __init__(self, render_delay=None, mode='human'):
         self.bots = [RandomBot(i) for i in range(4)]
         self.env = HeartsEnv(render_delay)
         self.mode = mode
