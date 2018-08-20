@@ -91,9 +91,10 @@ class SequentialBot(BotBase):
         return tuple(action)
 
 class BotProxy:
-    def __init__(self, render_delay=None):
+    def __init__(self, render_delay=None, mode='ansi'):
         self.bots = [RandomBot(i) for i in range(4)]
         self.env = HeartsEnv(render_delay)
+        self.mode = mode
 
     def add_bot(self, pos, bot):
         self.bots[pos] = bot
@@ -103,7 +104,7 @@ class BotProxy:
         done = False
         
         while not done:
-            self.env.render()
+            self.env.render(self.mode)
 
             n_round, start_pos, cur_pos, exchanged, hearts_occur, n_game,\
                     board, first_draw, bank = obs[1]
@@ -112,5 +113,5 @@ class BotProxy:
             action = self.bots[cur_pos].declare_action(player_obs, obs[1])
             obs, rew, done, _ = self.env.step(action)
 
-        self.env.render()
+        self.env.render(self.mode)
         return obs

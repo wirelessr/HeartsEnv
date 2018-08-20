@@ -136,7 +136,7 @@ class Table():
         else:
             os.system('clear')
 
-    def render(self):
+    def render(self, mode='human'):
         self._clear_screen()
         print('Game %d' % self.n_games)
         print('Round %d' % self.n_round)
@@ -146,21 +146,30 @@ class Table():
                     i, player.score))
             cards = ''
             for rank, suit in sorted(player.hand, key=lambda c: (c[1], c[0])):
-                cards += (' '+unicard('%s%s' % (RANK_TO_CARD[rank], SUIT_TO_CARD[suit]),\
-                        color=True))
+                if mode == 'human':
+                    cards += (' '+unicard('%s%s' % (RANK_TO_CARD[rank], SUIT_TO_CARD[suit]),\
+                            color=True))
+                elif mode == 'ansi':
+                    cards += (' %s%s' % (RANK_TO_CARD[rank], SUIT_TO_CARD[suit]))
             print(' ', cards)
             cards = ''
             for rank, suit in sorted(player.income, key=lambda c: (c[1], c[0])):
-                cards += (' '+unicard('%s%s' % (RANK_TO_CARD[rank], SUIT_TO_CARD[suit]),\
-                        color=True))
+                if mode == 'human':
+                    cards += (' '+unicard('%s%s' % (RANK_TO_CARD[rank], SUIT_TO_CARD[suit]),\
+                            color=True))
+                elif mode == 'ansi':
+                    cards += (' %s%s' % (RANK_TO_CARD[rank], SUIT_TO_CARD[suit]))
             print(' ', cards, '\n')
 
         board = ''
         for card in self.board:
             if card:
                 rank, suit = card
-                board += (' '+unicard('%s%s' % (RANK_TO_CARD[rank], SUIT_TO_CARD[suit]),\
-                        color=True)+' ')
+                if mode == 'human':
+                    board += (' '+unicard('%s%s' % (RANK_TO_CARD[rank], SUIT_TO_CARD[suit]),\
+                            color=True)+' ')
+                elif mode == 'ansi':
+                    board += (' %s%s' % (RANK_TO_CARD[rank], SUIT_TO_CARD[suit]))
             else:
                 board += ' NA'
         print(board, '\n')

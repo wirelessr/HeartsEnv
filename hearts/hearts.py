@@ -59,7 +59,7 @@ class HeartsEnv(gym.Env):
         return [seed]
 
     def render(self, mode='human', close=False):
-        self._table.render()
+        self._table.render(mode)
         if self.render_delay:
             time.sleep(self.render_delay)
 
