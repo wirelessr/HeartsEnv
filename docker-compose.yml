@@ -7,8 +7,11 @@ services:
     entrypoint:
     - sh
     - -c
-    - "sleep infinity"
+    - "/setup/run.sh;sleep infinity"
     volumes:
       - ./:/hearts
     privileged: true
     restart: always
+    ports:
+    - 6080:6080
+    - 8888:8888

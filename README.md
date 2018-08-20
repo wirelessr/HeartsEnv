@@ -23,6 +23,16 @@
     ```
     docker-compose exec hearts python /hearts/demo/demo_hearts.py
 
+## Jupyter (iPython)
+1. Open browser
+    ```
+    http://localhost:8888/
+
+## View OpenGL output
+1. Open browser
+    ```
+    http://localhost:6080/
+
 ## Other commands
 1. In docker-compose working directory
     1. Remove all docker containers
