@@ -67,6 +67,12 @@ class HeartsCoreTest(unittest.TestCase):
         with self.assertRaises(DrawLessThanThreeError):
             self.table.step((0, self.table.players[0].hand[0:2]))
 
+        self.table.n_games = 1
+        with self.assertRaises(DrawLessThanThreeError):
+            # duplicated card
+            dup = [random.choice(self.table.players[0].hand[0:2]) for _ in range(3)]
+            self.table.step((0, dup))
+
         self.table.n_games = 3
         new_deck = [(rank, suit) for suit in range(4) for rank in range(13)]
         self.table.game_start(new_deck)

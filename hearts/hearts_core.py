@@ -179,7 +179,7 @@ class Table():
         if self._need_exchange():
             if self.bank[cur_pos]:
                 raise FatalError('Already dropped')
-            if len(draws) != 3:
+            if len(set(draws)) != 3:
                 raise DrawLessThanThreeError('Draws less than 3')
 
             self.bank[cur_pos] = draws
