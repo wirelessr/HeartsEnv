@@ -1,6 +1,35 @@
 [![Build Status](https://travis-ci.org/wirelessr/HeartsEnv.svg?branch=master)](https://travis-ci.org/wirelessr/HeartsEnv)
 [![codecov](https://codecov.io/gh/wirelessr/HeartsEnv/branch/master/graph/badge.svg)](https://codecov.io/gh/wirelessr/HeartsEnv)
   
+### Description
+- 1.0.0 Full rules of Hearts has been supported
+
+#### Single Player Enviroment
+The environment is based on standard gym, so you can use `reset`, `step`, `render`, etc. to control the game.  
+Moreover, the action space supports `sample` and `contains`. When you cannot consider what action you should take,
+you can use `sample` to generate a regular action.  
+  
+The `render` supports two modes, *human* and *ansi*; the human mode can display colored cards, and the ansi mode 
+display only the text.  
+Every action you feed into `step` **MUST** pass the validation, or the environment throws the exception instead.  
+You can check the type of exception to clarify what rule you violated.
+
+```python
+from hearts.single import SingleEnv
+done = False
+env = SingleEnv()
+
+env.reset()
+while not done:
+    env.render()
+    # You can simply use sample() to finish the whole game
+    action = env.action_space.sample()
+
+    obs, reward, done, _ = self.env.step(action)
+    # Do whatever learning algorithm
+```
+
+
 ### Reference
   
 [gym.env](https://github.com/openai/gym/blob/master/gym/core.py)  
