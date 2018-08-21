@@ -176,7 +176,6 @@ class Table():
 
     def step(self, actions):
         cur_pos, draws = actions
-        logger.debug('[core] cur_pos %r', cur_pos)
         
         if cur_pos != self.cur_pos:
             raise TurnError('Not your turn')
@@ -229,6 +228,10 @@ class Table():
             else:
                 if not self.first_draw:
                     raise FatalError('You are not the first one')
+                if self.n_round == 0 and (draw == (10, S) or suit == H):
+                    for card in self.players[cur_pos].hand:
+                        if card[1] != H and card != (10, S):
+                            raise FirstRoundError('First round cannot break')
                 if not self._match_suit(cur_pos, suit):
                     raise RuleError('Suit does not match')
 
@@ -304,4 +307,7 @@ class HeartsError(Exception):
     pass
 
 class RuleError(Exception):
+    pass
+
+class FirstRoundError(Exception):
     pass

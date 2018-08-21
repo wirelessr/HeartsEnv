@@ -82,8 +82,10 @@ class HeartsCoreTest(unittest.TestCase):
         self.table.step((3, self.table.players[3].hand[0:1]))
 
         self.table.players[0].hand[0:3] = [(12,3), (12,2), (12,1)]
-        with self.assertRaises(RuleError):
+        with self.assertRaises(FirstRoundError):
             self.table.step((0, [(12, 1)]))
+        with self.assertRaises(RuleError):
+            self.table.step((0, [(12, 2)]))
         self.table.step((0, [(12, 3)]))
 
         self.table.players[1].hand[0:3] = [(11,3), (11,2), (11,1)]
