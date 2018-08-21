@@ -8,6 +8,7 @@ from numpy import array
 
 from .hearts_core import *
 from .bot import RandomBot, SequentialBot
+from .action_space import ActionSpace
 
 class SingleEnv(gym.Env):
     PLAYER = 3
@@ -164,6 +165,7 @@ class SingleEnv(gym.Env):
 
         table_states += [tuple(boards), tuple(first_draw), tuple(banks)]
 
+        self.action_space = ActionSpace(self._table, self.PLAYER)
         return (tuple(player_states), tuple(table_states))
 
     def reset(self):

@@ -98,41 +98,9 @@ class SingleEnvTest(unittest.TestCase):
         while not done:
             cur_pos = self.env._table.cur_pos
             self.assertEqual(cur_pos, self.env.PLAYER)
-            me = self.env._table.players[cur_pos]
             
-            if self.env._table._need_exchange():
-                cards = me.hand[0:3]
-        
-                draws = []
-                for rank, suit in cards:
-                    draws.append(array([rank, suit]))
-                acts = tuple(draws)
-            else:
-                draws = []
-                if (0, 3) in me.hand:
-                    draws = [(0, 3)]
-                else:
-                    for card in me.hand:
-                        if self.env._table.first_draw and card[1] == self.env._table.first_draw[1]:
-                            draws.append(card)
-                            break
-                    if not draws:
-                        for card in me.hand:
-                            if self.env._table.n_round == 0:
-                                if card[1] != 1 and card != (10, 0):
-                                    draws.append(card)
-                                    break
-                            else:
-                                if not self.env._table.heart_occur and card[1] != 1:
-                                    draws.append(card)
-                                    break
-                    if not draws:
-                        draws = [random.choice(me.hand)]
-                
-                # tuple to array
-                draws = [array([c[0], c[1]]) for c in draws]
-                draws = self.env._pad(draws, 3, array([-1, -1]))
-                acts = tuple(draws)
+            # You can simply use sample() to finish the whole game
+            acts = self.env.action_space.sample()
         
             self.assertTrue(self.env.action_space.contains(acts))
             _, _, done, _ = self.env.step(acts)

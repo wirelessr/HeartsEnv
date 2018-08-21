@@ -176,6 +176,7 @@ class Table():
 
     def step(self, actions):
         cur_pos, draws = actions
+        logger.debug('[step] cur_pos %r', cur_pos)
         
         if cur_pos != self.cur_pos:
             raise TurnError('Not your turn')
