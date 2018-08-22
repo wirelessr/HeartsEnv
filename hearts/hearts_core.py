@@ -76,6 +76,7 @@ class Table():
         self.heart_occur = False
         self.board = [None for _ in range(n_players)]
         self.first_draw = None
+        self.game_over = False
 
     def game_start(self, new_deck=None):
         # Reset Game State
@@ -177,6 +178,8 @@ class Table():
     def step(self, actions):
         cur_pos, draws = actions
         logger.debug('[step] cur_pos %r', cur_pos)
+        if self.game_over:
+            return True
         
         if cur_pos != self.cur_pos:
             raise TurnError('Not your turn')
@@ -276,6 +279,7 @@ class Table():
             for player in self.players:
                 if player.score >= 100:
                     # Game Over
+                    self.game_over = True
                     return True
             
             self.game_start()

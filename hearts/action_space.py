@@ -49,7 +49,8 @@ class ActionSpace:
             if not draws:
                 draws = hand
 
-            draws = [random.choice(draws)]
+            if draws: # False as hand is empty
+                draws = [random.choice(draws)]
 
         return [array([c[0], c[1]]) for c in draws]
                 
