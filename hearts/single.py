@@ -107,6 +107,7 @@ class SingleEnv(gym.Env):
 
         score_after = self._table.players[self.PLAYER].get_rewards()
 
+        score_before = 0 if self._table.n_round == 0 else score_before
         rewards = score_after - score_before
         
         # TODO Maybe can return some debug info
