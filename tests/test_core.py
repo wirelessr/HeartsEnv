@@ -37,7 +37,7 @@ class HeartsCoreTest(unittest.TestCase):
         self.assertEqual(self.player.get_rewards(), -13)
 
         self.player.income.append((10, 0))
-        self.assertEqual(self.player.get_rewards(), 26)
+        self.assertEqual(self.player.get_rewards(), 104)
 
     def test_table__game_start__normal(self):
         self.table.game_start()
@@ -76,6 +76,13 @@ class HeartsCoreTest(unittest.TestCase):
         self.table.n_games = 3
         new_deck = [(rank, suit) for suit in range(4) for rank in range(13)]
         self.table.game_start(new_deck)
+        # exposing
+        with self.assertRaises(TurnError):
+            self.table.step((3, self.table.players[3].hand[1:2]))
+        with self.assertRaises(ExposeError):
+            self.table.step((1, [self.table.players[1].hand[-2]]))
+        self.table.step((1, [self.table.players[1].hand[-1]]))
+
         with self.assertRaises(FirstDrawError):
             self.table.step((3, self.table.players[3].hand[1:2]))
 
@@ -160,6 +167,7 @@ class HeartsCoreTest(unittest.TestCase):
 
     def test_table__step__shoot_moon(self):
         self._deal()
+        self.table.finish_expose = True
 
         def _draw_one(i, player):
             self.table.step((i, player.hand[0:1]))
@@ -169,10 +177,10 @@ class HeartsCoreTest(unittest.TestCase):
         for _ in range(13):
             self._helper(_draw_one)
             
-        self.assertEqual(self.table.players[0].score, 0)
-        self.assertEqual(self.table.players[1].score, 26)
-        self.assertEqual(self.table.players[2].score, 26)
-        self.assertEqual(self.table.players[3].score, 26)
+        self.assertEqual(self.table.players[0].score, 208)
+        self.assertEqual(self.table.players[1].score, 0)
+        self.assertEqual(self.table.players[2].score, 0)
+        self.assertEqual(self.table.players[3].score, 0)
 
     def test_table__step__game_over(self):
         self._deal()
@@ -183,6 +191,10 @@ class HeartsCoreTest(unittest.TestCase):
         self.table.players[0].hand, self.table.players[3].hand = \
             self.table.players[3].hand, self.table.players[0].hand
         
+        # exposing
+        self.table.cur_pos = 1
+        self.table.step((1, []))
+
         for i in range(4):
             self.table.step((i, self.table.players[i].hand[0:1]))
 
@@ -193,9 +205,10 @@ class HeartsCoreTest(unittest.TestCase):
         for _ in range(11):
             for i in range(4):
                 self.table.step((i, self.table.players[i].hand[0:1]))
-            
-        self.assertEqual(self.table.players[0].score, 25)
+
+        # Clubs T
+        self.assertEqual(self.table.players[0].score, -50)
         self.assertEqual(self.table.players[1].score, 0)
         self.assertEqual(self.table.players[2].score, 0)
-        self.assertEqual(self.table.players[3].score, 1)
+        self.assertEqual(self.table.players[3].score, -1)
 

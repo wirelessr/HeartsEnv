@@ -42,20 +42,34 @@ n_hands = 13
 logger = logging.getLogger(__name__)
 
 class Player():
+    ALPHA = 4
+
     def __init__(self):
         self.hand = []
         self.income = []
         self.score = 0
 
-    def get_rewards(self):
-        rewards = 0
+    def get_rewards(self, exposed_heart=False):
+        heart_broken = 0
+        spade_q = False
+        club_t = False
         for rank, suit in self.income:
             if (rank, suit) == (10, S):
-                rewards -= 13
+                spade_q = True
             elif suit == H:
-                rewards -= 1
+                heart_broken += 1
+            elif (rank, suit) == (8, C):
+                club_t = True
         
-        return rewards if rewards != -26 else 26
+        rewards = 0
+        rewards -= heart_broken * 2 if exposed_heart else heart_broken
+        rewards -= 13 if spade_q else 0
+        rewards *= 2 if club_t else 1
+
+        if heart_broken == 13 and spade_q:
+            rewards = (-self.ALPHA) * rewards
+
+        return rewards
 
 
 class Table():
@@ -76,6 +90,8 @@ class Table():
         self.heart_occur = False
         self.board = [None for _ in range(n_players)]
         self.first_draw = None
+        self.finish_expose = False
+        self.heart_exposed = False
 
     def game_start(self, new_deck=None):
         # Reset Game State
@@ -93,7 +109,7 @@ class Table():
             player.income = []
 
         if self.n_games % 4 == 0:
-            self._find_clubs_2()
+            self._find_hearts_A()
 
     def _need_exchange(self):
         if not self.exchanged and self.n_games % 4 != 0:
@@ -125,6 +141,13 @@ class Table():
     def _find_clubs_2(self):
         for i, player in enumerate(self.players):
             if (0, C) in player.hand:
+                self.start_pos = i
+
+        self.cur_pos = self.start_pos
+
+    def _find_hearts_A(self):
+        for i, player in enumerate(self.players):
+            if (12, H) in player.hand:
                 self.start_pos = i
 
         self.cur_pos = self.start_pos
@@ -209,9 +232,20 @@ class Table():
                     raise FatalError('Game# mod 4 == 0')
 
                 self.exchanged = True
-                self._find_clubs_2()
+                self._find_hearts_A()
             else:
                 self.cur_pos = (self.cur_pos + 1) % n_players
+        elif not self.finish_expose:
+            if len(draws) > 1:
+                raise DrawMoreThanOneError('Draw more than 1 card')
+
+            if len(draws) == 1:
+                if draws[0] != (12, H):
+                    raise ExposeError('Must expose hearts A')
+                self.heart_exposed = True
+
+            self.finish_expose = True
+            self._find_clubs_2()
         else:
             if len(draws) > 1:
                 raise DrawMoreThanOneError('Draw more than 1 card')
@@ -256,27 +290,15 @@ class Table():
                 self.cur_pos = self.start_pos
             else:
                 self.cur_pos = (self.cur_pos + 1) % n_players
-            
 
 
         if self.n_round == 13:
-            pos = self._shoot_moon()
-            if pos is not None:
-                for i, player in enumerate(self.players):
-                    if i != pos:
-                        player.score += 26
-            else:
-                for player in self.players:
-                    for rank, suit in player.income:
-                        if (rank, suit) == (10, S):
-                            player.score += 13
-                        elif suit == H:
-                            player.score += 1
-            
             for player in self.players:
-                if player.score >= 100:
-                    # Game Over
-                    return True
+                player.score += player.get_rewards(self.heart_exposed)
+            
+            if self.n_games == 16:
+                # Game Over
+                return True
             
             self.game_start()
         
@@ -311,4 +333,7 @@ class RuleError(Exception):
     pass
 
 class FirstRoundError(Exception):
+    pass
+
+class ExposeError(Exception):
     pass

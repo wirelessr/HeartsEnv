@@ -66,7 +66,9 @@ class SingleEnvTest(unittest.TestCase):
 
         draws = []
         me.hand.reverse()
-        if (0, 3) in me.hand:
+        if not self.env._table.finish_expose:
+            draws = [(12, 1)]
+        elif (0, 3) in me.hand:
             draws = [(0, 3)]
         else:
             for card in me.hand:
@@ -85,6 +87,10 @@ class SingleEnvTest(unittest.TestCase):
                             break
             if not draws:
                 draws = [random.choice(me.hand)]
+
+        #self.env._table.finish_expose = True
+        logger.debug(me.hand)
+        logger.debug(draws)
 
         # tuple to array
         acts = [array([c[0], c[1]]) for c in draws]

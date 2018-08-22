@@ -37,6 +37,8 @@ class SingleEnv(gym.Env):
                 spaces.Discrete(1), # exchanged
                 spaces.Discrete(1), # heart_occured
                 spaces.Discrete(100), # n_games
+                spaces.Discrete(1), # finish_expose
+                spaces.Discrete(1), # heart_exposed
                 spaces.Tuple([ # board
                     spaces.MultiDiscrete([13, 4])
                 ] * 4),
@@ -144,6 +146,8 @@ class SingleEnv(gym.Env):
             int(self._table.exchanged),
             int(self._table.heart_occur),
             int(self._table.n_games),
+            int(self._table.finish_expose),
+            int(self._table.heart_exposed),
         ]
 
         boards = []

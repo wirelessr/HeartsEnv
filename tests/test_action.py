@@ -36,6 +36,7 @@ class ActionSpaceTest(unittest.TestCase):
         self.assertEqual(set(self.table.players[0].hand), set(sample))
         
         self.table.exchanged = True
+        self.table.finish_expose = True
         sample = [(c[0], c[1]) for c in self.action.sample()]
         self.assertEqual(len(sample), 1)
         self.assertIn(sample[0], [(0, 0), (2, 2)])

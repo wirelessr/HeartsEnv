@@ -16,10 +16,4 @@ class HeartsBotTest(unittest.TestCase):
         self.proxy.add_bot(0, SequentialBot(0))
         obs = self.proxy.run_once()
 
-        max_score = 0
-        for cur_pos in range(4):
-            [score], (hand,), _ = tuple([obs[0][i]] for i in range(cur_pos*3, cur_pos*3+3))
-            if score > max_score:
-                max_score = score
-
-        self.assertTrue(max_score >= 100)
+        self.assertTrue(obs[1][5] == 16)

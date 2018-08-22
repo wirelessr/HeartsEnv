@@ -21,7 +21,7 @@ class RandomBot(BotBase):
 
         score, (hand,), (income,) = player_obs
         n_round, start_pos, cur_pos, exchanged, hearts_occur, n_game,\
-                board, (first_draw,), bank = table_obs
+            finish_expose, heart_exposed, board, (first_draw,), bank = table_obs
         
         hand_card = [c for c in hand if c[0] != -1 or c[1] != -1]
         board_card = [c for c in board]
@@ -29,6 +29,8 @@ class RandomBot(BotBase):
         if not exchanged and n_game % 4 != 0:
             # 3 cards
             draws = random.sample(hand, 3)
+        elif not finish_expose:
+            draws = [array([12, 1]), array([-1, -1]), array([-1, -1])]
         else:
             # 1 card
             if self.idx == start_pos and n_round == 0:
@@ -62,7 +64,7 @@ class SequentialBot(BotBase):
 
         score, (hand,), (income,) = player_obs
         n_round, start_pos, cur_pos, exchanged, hearts_occur, n_game,\
-                board, (first_draw,), bank = table_obs
+            finish_expose, heart_exposed, board, (first_draw,), bank = table_obs
         
         hand_card = sorted([c for c in hand if c[0] != -1 or c[1] != -1],\
                 key=lambda x: (x[1], x[0]), reverse=True)
@@ -71,6 +73,8 @@ class SequentialBot(BotBase):
         if not exchanged and n_game % 4 != 0:
             # 3 cards
             draws = random.sample(hand, 3)
+        elif not finish_expose:
+            draws = [array([12, 1]), array([-1, -1]), array([-1, -1])]
         else:
             # 1 card
             if self.idx == start_pos and n_round == 0:
@@ -115,7 +119,7 @@ class BotProxy:
             self.env.render(self.mode)
 
             n_round, start_pos, cur_pos, exchanged, hearts_occur, n_game,\
-                    board, first_draw, bank = obs[1]
+            finish_expose, heart_exposed, board, (first_draw,), bank = obs[1]
 
             player_obs = tuple([obs[0][i]] for i in range(cur_pos*3, cur_pos*3+3))
             action = self.bots[cur_pos].declare_action(player_obs, obs[1])
