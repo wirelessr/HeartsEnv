@@ -22,6 +22,8 @@ class SingleEnvTest(unittest.TestCase):
         self.env.close()
 
     def test_env__obs_space(self):
+        logger.debug(self.r)
+        logger.debug(self.env.observation_space.sample())
         self.assertTrue(self.env.observation_space.contains(self.r))
 
     def test_env__action_space(self):

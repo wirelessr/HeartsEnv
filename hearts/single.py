@@ -18,9 +18,12 @@ class SingleEnv(gym.Env):
         self.observation_space = spaces.Tuple([
             # player states
             spaces.Tuple([
-                spaces.Discrete(200), # p0 score
-                spaces.Discrete(200), # p1 score
-                spaces.Discrete(200), # p2 score
+                spaces.Tuple([ # p0, p1, p2
+                    spaces.Discrete(200), # score
+                    spaces.Tuple([ # income
+                        spaces.MultiDiscrete([13, 4])
+                    ] * 52),
+                ] * 3),
                 spaces.Discrete(200), # p3 score
                 spaces.Tuple([ # hand
                     spaces.MultiDiscrete([13, 4])
@@ -120,7 +123,19 @@ class SingleEnv(gym.Env):
 
 
     def _get_current_state(self):
-        player_states = [self._table.players[i].score for i in range(self.PLAYER)] 
+        opponent_features = []
+        for i in range(self.PLAYER):
+            opponent_income = []
+            for card in self._table.players[i].income:
+                opponent_income.append(array(card))
+            opponent_income = self._pad(opponent_income, 52, array((-1, -1)))
+
+            opponent_features += [
+                int(self._table.players[i].score),
+                tuple(opponent_income),
+            ]
+
+        player_states = [tuple(opponent_features)]
 
         player = self._table.players[self.PLAYER]
         player_features = [
