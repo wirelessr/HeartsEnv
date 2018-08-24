@@ -29,6 +29,54 @@ while not done:
     # Do whatever learning algorithm
 ```
 
+#### Special rules
+This environment has also been applied the special rules from **TrendMicro 2018 AI Contests** in the *trend_rule* branch.
+
+#### Observation
+The observation is a tuple consist of two parts; one is player information, which are score, hand cards and receiving cards, not to mention that only you yourself can see the hand cards. Another is table information including many states, such as round, start position, current position, pass or not, was there a heart broken, how many games, expose hearts or not, is there any exposed, borad cards, the leading card at current round, and the last board cards.  
+The most important thing is the player is always at the **position 3**, so that you can check the index of board or backup to get the other opponents' information.  
+The detail is at [single.py](https://github.com/wirelessr/HeartsEnv/blob/trend_rule/hearts/single.py)
+  
+```python
+        self.observation_space = spaces.Tuple([
+            # player states
+            spaces.Tuple([
+                spaces.Tuple([ # p0, p1, p2
+                    spaces.Discrete(200), # score
+                    spaces.Tuple([ # income
+                        spaces.MultiDiscrete([13, 4])
+                    ] * 52),
+                ] * 3),
+                spaces.Discrete(200), # p3 score
+                spaces.Tuple([ # hand
+                    spaces.MultiDiscrete([13, 4])
+                ] * 13),
+                spaces.Tuple([ # income
+                    spaces.MultiDiscrete([13, 4])
+                ] * 52),
+            ]),
+            # table states
+            spaces.Tuple([
+                spaces.Discrete(13), # n_round
+                spaces.Discrete(4), # start_pos
+                spaces.Discrete(4), # cur_pos
+                spaces.Discrete(1), # exchanged
+                spaces.Discrete(1), # heart_occured
+                spaces.Discrete(100), # n_games
+                spaces.Discrete(1), # finish_expose
+                spaces.Discrete(1), # heart_exposed
+                spaces.Tuple([ # board
+                    spaces.MultiDiscrete([13, 4])
+                ] * 4),
+                spaces.Tuple([ # first_draw
+                    spaces.MultiDiscrete([13, 4])
+                ]),
+                spaces.Tuple([ # backup
+                    spaces.MultiDiscrete([13, 4])
+                ] * 4)
+            ]),
+        ])
+```
 
 ### Reference
   
