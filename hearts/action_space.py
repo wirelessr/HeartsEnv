@@ -21,6 +21,15 @@ class ActionSpace:
         return False
 
     def sample(self):
+        draws = self.get_all_valid_actions()
+        if draws and \
+                not self._table._need_exchange() and \
+                self._table.finish_expose: # False as hand is empty
+            draws = [random.choice(draws)]
+
+        return [array([c[0], c[1]]) for c in draws]
+
+    def get_all_valid_actions(self):
         hand = self._table.players[self._pos].hand
 
         if self._table._need_exchange():
@@ -47,12 +56,7 @@ class ActionSpace:
                         for c in hand:
                             if c[1] != 1:
                                 draws.append(c)
-                
             if not draws:
                 draws = hand
-
-            if draws: # False as hand is empty
-                draws = [random.choice(draws)]
-
-        return [array([c[0], c[1]]) for c in draws]
+        return draws
                 
