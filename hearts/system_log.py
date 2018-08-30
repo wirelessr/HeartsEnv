@@ -16,7 +16,7 @@ class Log(object):
     def save_logs(self,msg):
         self.logger.info(msg)
 
-IS_DEBUG=True
+IS_DEBUG=False
 system_log=Log(IS_DEBUG)
 
 
