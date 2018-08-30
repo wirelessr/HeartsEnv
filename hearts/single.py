@@ -131,12 +131,9 @@ class SingleEnv(gym.Env):
             try:
                 if type(draws) is str:
                     draws = [draws]
-                logger.debug('draws %r', draws)
                 draws = [(RANK_TO_INT[c[0]]-2, INT_TO_SUIT.index(c[1])) for c in draws]
                 done = self._table.step((cur_pos, draws))
             except Exception:
-                logger.error('hand %r info hand %r', player.hand, info.players[cur_pos].hand.df)
-                logger.error('info candidate %r', info.candidate)
                 action_space = ActionSpace(self._table, cur_pos)
                 draws = [(c[0], c[1]) for c in action_space.sample()]
                 done = self._table.step((cur_pos, draws))
