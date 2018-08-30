@@ -10,6 +10,20 @@ from .hearts_core import *
 from .bot import RandomBot, SequentialBot
 from .action_space import ActionSpace
 
+from .rule_bot import GameInfo, ChunTingBot
+from .card import INT_TO_RANK, RANK_TO_INT
+
+INT_TO_SUIT = ['S', 'H', 'D', 'C']
+def convert_array_to_card(array_card):
+    if not array_card:
+        return None
+    if array_card == (-1, -1):
+        return None
+    r, s = array_card[0], array_card[1]
+    rank = INT_TO_RANK[r+2]
+    suit = INT_TO_SUIT[s]
+    return rank+suit
+
 class SingleEnv(gym.Env):
     PLAYER = 3
 
@@ -58,7 +72,7 @@ class SingleEnv(gym.Env):
             spaces.MultiDiscrete([13, 4])
         ] * 3)
 
-        self.bots = [random.choice([SequentialBot(i), RandomBot(i)]) for i in range(3)]
+        self.bots = [ChunTingBot() for _ in range(3)]
 
     def seed(self, seed=None):
         _, seed = seeding.np_random(seed)
@@ -69,27 +83,63 @@ class SingleEnv(gym.Env):
     def render(self, mode='human', close=False):
         self._table.render()
 
+    def _pack_obs_to_info(self):
+        info = GameInfo()
+
+        action_sapce = ActionSpace(self._table, self._table.cur_pos)
+        cards = action_sapce.get_all_valid_actions()
+        for card in cards:
+            if card != (-1, -1):
+                info.candidate.append(convert_array_to_card(card))
+        #logger.debug('pos %r candidate %r' % (self._table.cur_pos, info.candidate))
+
+        info.table.heart_exposed = self._table.heart_exposed
+        info.table.exchanged = self._table.exchanged
+        info.table.n_round = self._table.n_round + 1
+        info.table.n_game = self._table.n_games
+        info.table.first_draw = convert_array_to_card(self._table.first_draw) if self._table.first_draw else None
+        info.table.finish_expose = self._table.finish_expose
+        info.me = self._table.cur_pos
+
+        for idx, card in enumerate(self._table.board):
+            info.table.board[idx] = convert_array_to_card(card)
+
+        for idx, player in enumerate(self._table.players):
+            if idx == info.me:
+                for card in player.hand:
+                    info.players[idx].hand.add_card(convert_array_to_card(card))
+                #logger.debug('pos %r hand %r' % (self._table.cur_pos, info.players[idx].hand.df))
+            for card in player.income:
+                info.players[idx].income.add_card(convert_array_to_card(card))
+                info.table.opening_card.add_card(convert_array_to_card(card))
+
+        if info.table.first_draw:
+            for idx, card in enumerate(info.table.board):
+                if card and card[1] != info.table.first_draw[1]:
+                    info.players[idx].no_suit.add(info.table.first_draw[1])
+
+        return info
+
     def _push_turn(self):
         while self._table.cur_pos != self.PLAYER:
             cur_pos = self._table.cur_pos
             player = self._table.players[cur_pos]
 
-            player_hand = []
-            for card in player.hand:
-                player_hand.append(array(card))
-            player_hand = self._pad(player_hand, 13, array((-1, -1)))
-
-            player_income = []
-            for card in player.income:
-                player_income.append(array(card))
-            player_income = self._pad(player_income, 52, array((-1, -1)))
-            
-            obs = self._get_current_state()
-            player_obs = tuple([player.score, tuple([player_hand,]), tuple([player_income,])])
+            info = self._pack_obs_to_info()
+            draws = self.bots[cur_pos].declare_action(info)
             logger.debug('[push turn] cur_pos %r', cur_pos)
-            cur_pos, draws = self.bots[cur_pos].declare_action(player_obs, obs[1])
-            draws = [(c[0], c[1]) for c in draws if not all(c == (-1, -1))]
-            done = self._table.step((cur_pos, draws))
+            try:
+                if type(draws) is str:
+                    draws = [draws]
+                logger.debug('draws %r', draws)
+                draws = [(RANK_TO_INT[c[0]]-2, INT_TO_SUIT.index(c[1])) for c in draws]
+                done = self._table.step((cur_pos, draws))
+            except Exception:
+                logger.error('hand %r info hand %r', player.hand, info.players[cur_pos].hand.df)
+                logger.error('info candidate %r', info.candidate)
+                action_space = ActionSpace(self._table, cur_pos)
+                draws = [(c[0], c[1]) for c in action_space.sample()]
+                done = self._table.step((cur_pos, draws))
             if done:
                 return True
         
@@ -102,7 +152,7 @@ class SingleEnv(gym.Env):
         
         card_array = action
         score_before = self._table.players[self.PLAYER].get_rewards()
-        
+
         draws = [(c[0], c[1]) for c in card_array if not all(c == (-1, -1))]
         done = self._table.step((self.PLAYER, draws))
         if not done:
@@ -190,6 +240,7 @@ class SingleEnv(gym.Env):
 
     def reset(self):
         self._table = Table(self.n_seed)
+        self.last_first_draw = None
         self._table.game_start()
         self._push_turn()
         return self._get_current_state()

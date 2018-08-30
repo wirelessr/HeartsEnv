@@ -22,10 +22,11 @@ class ActionSpace:
 
     def sample(self):
         draws = self.get_all_valid_actions()
-        if draws and \
-                not self._table._need_exchange() and \
-                self._table.finish_expose: # False as hand is empty
-            draws = [random.choice(draws)]
+        if draws:
+            if self._table._need_exchange():
+                draws = random.sample(draws, 3)
+            else:
+                draws = [random.choice(draws)]
 
         return [array([c[0], c[1]]) for c in draws]
 
@@ -34,9 +35,9 @@ class ActionSpace:
 
         if self._table._need_exchange():
             # 3 cards
-            draws = random.sample(hand, 3)
+            draws = hand
         elif not self._table.finish_expose:
-            draws = [random.choice([(12, 1), (-1, -1)])]
+            draws = [(12, 1), (-1, -1)]
         else:
             # 1 card
             draws = []
