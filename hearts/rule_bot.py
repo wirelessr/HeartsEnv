@@ -126,6 +126,15 @@ class GameInfo:
             t = np.append(t, p.to_array())
         return np.append(t, self.table.to_array())
 
+class RandomBot():
+    def declare_action(self, info):
+        if not info.table.exchanged and info.table.n_game % 4 != 0:
+            return random.sample(info.candidate, 3)
+        elif not info.table.finish_expose:
+            expose = random.choice(['AH', None])
+            return ['AH'] if expose else []
+        else:
+            return random.choice(info.candidate)
 
 class ChunTingBot():
     def declare_action(self, info):

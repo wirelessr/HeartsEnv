@@ -7,10 +7,9 @@ from gym.utils import seeding
 from numpy import array
 
 from .hearts_core import *
-from .bot import RandomBot, SequentialBot
 from .action_space import ActionSpace
 
-from .rule_bot import GameInfo, ChunTingBot
+from .rule_bot import GameInfo, ChunTingBot, RandomBot
 from .card import INT_TO_RANK, RANK_TO_INT
 
 INT_TO_SUIT = ['S', 'H', 'D', 'C']
@@ -72,7 +71,8 @@ class SingleEnv(gym.Env):
             spaces.MultiDiscrete([13, 4])
         ] * 3)
 
-        self.bots = [ChunTingBot() for _ in range(3)]
+        self.bots = [RandomBot() for _ in range(3)]
+        self.opponents_obs = {}
 
     def seed(self, seed=None):
         _, seed = seeding.np_random(seed)
@@ -126,6 +126,8 @@ class SingleEnv(gym.Env):
             player = self._table.players[cur_pos]
 
             info = self._pack_obs_to_info()
+            self.opponents_obs[cur_pos] = [self._get_current_state(cur_pos)]
+
             draws = self.bots[cur_pos].declare_action(info)
             logger.debug('[push turn] cur_pos %r', cur_pos)
             try:
@@ -137,6 +139,8 @@ class SingleEnv(gym.Env):
                 action_space = ActionSpace(self._table, cur_pos)
                 draws = [(c[0], c[1]) for c in action_space.sample()]
                 done = self._table.step((cur_pos, draws))
+
+            self.opponents_obs[cur_pos].append(self._get_current_state(cur_pos))
             if done:
                 return True
         
@@ -149,6 +153,7 @@ class SingleEnv(gym.Env):
         
         card_array = action
         score_before = self._table.players[self.PLAYER].get_rewards()
+        self.opponents_obs = {}
 
         draws = [(c[0], c[1]) for c in card_array if not all(c == (-1, -1))]
         done = self._table.step((self.PLAYER, draws))
@@ -161,7 +166,7 @@ class SingleEnv(gym.Env):
         rewards = score_after - score_before
         
         # TODO Maybe can return some debug info
-        return self._get_current_state(), rewards, done, {}
+        return self._get_current_state(), rewards, done, self.opponents_obs
 
     def _pad(self, l, n, v):
         if (not l) or (l is None):
@@ -169,22 +174,23 @@ class SingleEnv(gym.Env):
         return l + [v] * (n - len(l))
 
 
-    def _get_current_state(self):
+    def _get_current_state(self, pos=PLAYER):
         opponent_features = []
-        for i in range(self.PLAYER):
-            opponent_income = []
-            for card in self._table.players[i].income:
-                opponent_income.append(array(card))
-            opponent_income = self._pad(opponent_income, 52, array((-1, -1)))
+        for i in range(4):
+            if i != pos:
+                opponent_income = []
+                for card in self._table.players[i].income:
+                    opponent_income.append(array(card))
+                opponent_income = self._pad(opponent_income, 52, array((-1, -1)))
 
-            opponent_features += [
-                int(self._table.players[i].score),
-                tuple(opponent_income),
-            ]
+                opponent_features += [
+                    int(self._table.players[i].score),
+                    tuple(opponent_income),
+                ]
 
         player_states = [tuple(opponent_features)]
 
-        player = self._table.players[self.PLAYER]
+        player = self._table.players[pos]
         player_features = [
             int(player.score),
         ]
