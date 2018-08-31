@@ -48,6 +48,7 @@ class Player():
         self.hand = []
         self.income = []
         self.score = 0
+        self.deal_score = 0
 
     def get_rewards(self, exposed_heart=False):
         heart_broken = 0
@@ -294,17 +295,20 @@ class Table():
             else:
                 self.cur_pos = (self.cur_pos + 1) % n_players
 
+        for player in self.players:
+            if self.n_round == 13:
+                player.deal_score += player.get_rewards(self.heart_exposed)
+                player.score = player.deal_score
+            else:
+                player.score = player.deal_score + player.get_rewards(self.heart_exposed)
 
         if self.n_round == 13:
-            for player in self.players:
-                player.score += player.get_rewards(self.heart_exposed)
-            
             if self.n_games == 16:
                 # Game Over
                 return True
-            
+
             self.game_start()
-        
+
         return False
 
     def _step(self, actions):
