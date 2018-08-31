@@ -88,7 +88,7 @@ class SingleEnv(gym.Env):
             player_obs = tuple([player.score, tuple([player_hand,]), tuple([player_income,])])
             logger.debug('[push turn] cur_pos %r', cur_pos)
             cur_pos, draws = self.bots[cur_pos].declare_action(player_obs, obs[1])
-            draws = [(c[0], c[1]) for c in draws if not all(c == (-1, -1))]
+            draws = [(c[0], c[1]) for c in draws if not (c[0] == -1 and c[1] == -1)]
             done = self._table.step((cur_pos, draws))
             if done:
                 return True
@@ -103,7 +103,7 @@ class SingleEnv(gym.Env):
         card_array = action
         score_before = self._table.players[self.PLAYER].get_rewards()
         
-        draws = [(c[0], c[1]) for c in card_array if not all(c == (-1, -1))]
+        draws = [(c[0], c[1]) for c in card_array if not (c[0] == -1 and c[1] == -1)]
         done = self._table.step((self.PLAYER, draws))
         if not done:
             done = self._push_turn()

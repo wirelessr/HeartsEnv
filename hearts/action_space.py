@@ -14,7 +14,7 @@ class ActionSpace:
         if len(x) not in [1, 3]:
             logger.error('Length is %r', len(x))
             return False
-        x = [(c[0], c[1]) for c in x if not all(c == (-1, -1))]
+        x = [(c[0], c[1]) for c in x if not (c[0] == -1 and c[1] == -1)]
         if set(self._table.players[self._pos].hand).issuperset(set(x)):
             return True
         logger.debug('Not found')
