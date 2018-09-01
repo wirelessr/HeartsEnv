@@ -36,7 +36,7 @@ class ActionSpace:
             # 3 cards
             draws = random.sample(hand, 3)
         elif not self._table.finish_expose:
-            draws = [random.choice([(12, 1), (-1, -1)])]
+            draws = [(12, 1), (-1, -1)]
         else:
             # 1 card
             draws = []
