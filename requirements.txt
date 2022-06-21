@@ -8,7 +8,7 @@ gym==0.10.5
 idna==2.7
 more-itertools==4.3.0
 nose==1.3.7
-numpy==1.15.0
+numpy==1.22.0
 pathlib2==2.3.2
 pluggy==0.7.1
 py==1.10.0
